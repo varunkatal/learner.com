@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/*
+  Learner design tokens — the single place brand colours live.
+  Use them as Tailwind classes, e.g. bg-brand, text-ink, border-line, rounded-card.
+*/
+@theme {
+  --color-brand: #ff2d68; /* primary pink: buttons, highlights */
+  --color-brand-hover: #e91e5b;
+  /* Darker pink for pink *text* (links on white). #FF2D68 is only 3.6:1 on white,
+     below the 4.5:1 needed for readable small text; this shade is 5:1. */
+  --color-brand-ink: #d81b55;
+  --color-ink: #17164f; /* deep indigo: headings, nav, footer */
+  --color-blush: #fff0f5; /* soft pink: hero and promo backgrounds */
+  --color-lavender: #f7f5ff; /* secondary cards, panels */
+  --color-body: #414567; /* body text */
+  /* Muted text. Palette value #74799A is 4.2:1 on white (just under 4.5:1),
+     so this is nudged slightly darker to stay readable. */
+  --color-muted: #6b7091;
+  --color-surface: #f8f9fc; /* light grey page sections */
+  --color-line: #e8eaf2; /* borders */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+
+  --radius-card: 16px;
+  --shadow-card:
+    0 1px 2px rgb(23 22 79 / 0.04), 0 8px 24px rgb(23 22 79 / 0.06);
+  --shadow-card-hover:
+    0 2px 4px rgb(23 22 79 / 0.06), 0 16px 40px rgb(23 22 79 / 0.1);
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Base styles live in the base layer so Tailwind classes (e.g. text-white) can override them. */
+@layer base {
+  body {
+    background: var(--color-white);
+    color: var(--color-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-ink);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-ink);
+    outline-offset: 2px;
+  }
+}

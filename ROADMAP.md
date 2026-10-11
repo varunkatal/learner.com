@@ -11,7 +11,7 @@ A separate educational website where Varun uploads recorded lessons, offers a mi
 
 1. **One phase at a time.** Finish, test with real videos and real users, then move on.
 2. **Simple and working beats feature-rich.** Every phase ends with something usable.
-3. **Videos never live on our own server.** A video hosting service stores, converts and streams them. Our site stores only *information about* videos.
+3. **Videos never live on our own server.** A video hosting service stores, converts and streams them. Our site stores only _information about_ videos.
 4. **Build for mobile first.** Most students will watch on phones over mobile data.
 5. **Build the backend once.** The website and future apps share the same API and database.
 
@@ -19,19 +19,19 @@ A separate educational website where Varun uploads recorded lessons, offers a mi
 
 ## Tech stack
 
-| Layer | Choice | Why |
-|---|---|---|
-| Website | Next.js (App Router) + TypeScript + Tailwind CSS | Already used on mathslearner; SEO-friendly; API routes built in |
-| Hosting | Vercel | Free tier to start, easy deploys from GitHub |
-| Domain / DNS | Hostinger | Already familiar |
-| Database | MongoDB Atlas + Mongoose | Already familiar; flexible for course structure |
-| Auth | Auth.js (NextAuth) — email/password + Google login | Role-based sessions (student / admin) |
-| Video hosting | Cloudflare Stream **or** Bunny Stream (final pick in Phase 2) | Adaptive quality, CDN, signed URLs; Cloudflare also does live |
-| Files (notes PDFs, thumbnails) | Cloudinary or Cloudflare R2 | Cheap file storage |
-| Payments | Razorpay | Indian payments: UPI, cards, netbanking |
-| Email | Resend (or similar) | Welcome, password reset, payment receipts |
-| Live streaming | OBS Studio → video host's live input | Free software, professional output |
-| Mobile apps | PWA first → Expo (React Native) | Instant install now; store apps later on same API |
+| Layer                          | Choice                                                        | Why                                                             |
+| ------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------- |
+| Website                        | Next.js (App Router) + TypeScript + Tailwind CSS              | Already used on mathslearner; SEO-friendly; API routes built in |
+| Hosting                        | Vercel                                                        | Free tier to start, easy deploys from GitHub                    |
+| Domain / DNS                   | Hostinger                                                     | Already familiar                                                |
+| Database                       | MongoDB Atlas + Mongoose                                      | Already familiar; flexible for course structure                 |
+| Auth                           | Auth.js (NextAuth) — email/password + Google login            | Role-based sessions (student / admin)                           |
+| Video hosting                  | Cloudflare Stream **or** Bunny Stream (final pick in Phase 2) | Adaptive quality, CDN, signed URLs; Cloudflare also does live   |
+| Files (notes PDFs, thumbnails) | Cloudinary or Cloudflare R2                                   | Cheap file storage                                              |
+| Payments                       | Razorpay                                                      | Indian payments: UPI, cards, netbanking                         |
+| Email                          | Resend (or similar)                                           | Welcome, password reset, payment receipts                       |
+| Live streaming                 | OBS Studio → video host's live input                          | Free software, professional output                              |
+| Mobile apps                    | PWA first → Expo (React Native)                               | Instant install now; store apps later on same API               |
 
 ---
 
@@ -46,6 +46,7 @@ Class (e.g. Class 9)
 ```
 
 **Paid access model (decide in Phase 4):**
+
 - Option A — buy a whole **course** (e.g. "Class 9 Science full year")
 - Option B — monthly/yearly **subscription** to everything
 - Option C — both
@@ -58,11 +59,11 @@ Class (e.g. Class 9)
 
 - [ ] Decide site name and buy domain
 - [x] Create GitHub repository
-- [ ] Create Next.js + TypeScript + Tailwind project
-- [ ] Add `CLAUDE.md`, `ROADMAP.md`, `.env.example`, `.gitignore`
+- [x] Create Next.js + TypeScript + Tailwind project
+- [x] Add `CLAUDE.md`, `ROADMAP.md`, `.env.example`, `.gitignore`
 - [ ] Create MongoDB Atlas cluster (new project, not mathslearner's)
 - [ ] Deploy to Vercel, connect domain via Hostinger DNS
-- [ ] Set up ESLint + Prettier
+- [x] Set up ESLint + Prettier
 
 **Done when:** a "Coming soon" page is live on the real domain.
 
@@ -72,13 +73,13 @@ Class (e.g. Class 9)
 
 **Goal:** a good-looking, fast, mobile-friendly public website.
 
-- [ ] Design system: colours, fonts, logo, button and card components
-- [ ] Layout: header with navigation, footer, mobile menu
-- [ ] Home page: hero, featured classes, how it works, free lessons preview, testimonials placeholder
-- [ ] Classes page → Subjects page → Chapter list page (using sample data)
-- [ ] About, Contact, Privacy Policy, Terms, Refund Policy pages (Razorpay requires the last three)
+- [x] Design system: colours, fonts, logo, button and card components
+- [x] Layout: header with navigation, footer, mobile menu
+- [x] Home page: hero, featured classes, how it works, free lessons preview, testimonials placeholder
+- [x] Classes page → Subjects page → Chapter list page (using sample data)
+- [x] About, Contact, Privacy Policy, Terms, Refund Policy pages (Razorpay requires the last three)
 - [ ] Database models: Class, Subject, Chapter (seed with real syllabus)
-- [ ] SEO basics: page titles, descriptions, sitemap, Open Graph images
+- [x] SEO basics: page titles, descriptions, sitemap, Open Graph images
 - [ ] Lighthouse check on mobile (aim 90+ performance)
 
 **Done when:** a visitor on a phone can browse Class → Subject → Chapter smoothly.
@@ -202,6 +203,7 @@ Class (e.g. Class 9)
 ## Running costs to watch
 
 Review monthly once real usage starts:
+
 - Video hosting (grows with minutes stored and minutes watched — the biggest cost)
 - MongoDB Atlas (free tier at first)
 - Vercel (free tier at first)
@@ -213,11 +215,11 @@ Review monthly once real usage starts:
 
 ## Open decisions
 
-| # | Decision | Needed by |
-|---|---|---|
-| 1 | Site name and domain | Phase 0 |
-| 2 | Classes and subjects at launch | Phase 1 |
-| 3 | Logo, colours, reference sites | Phase 1 |
-| 4 | Expected hours of video per month | Phase 2 |
-| 5 | Cloudflare Stream vs Bunny Stream | Phase 2 |
-| 6 | Pricing model and prices | Phase 4 |
+| #   | Decision                          | Needed by |
+| --- | --------------------------------- | --------- |
+| 1   | Site name and domain              | Phase 0   |
+| 2   | Classes and subjects at launch    | Phase 1   |
+| 3   | Logo, colours, reference sites    | Phase 1   |
+| 4   | Expected hours of video per month | Phase 2   |
+| 5   | Cloudflare Stream vs Bunny Stream | Phase 2   |
+| 6   | Pricing model and prices          | Phase 4   |

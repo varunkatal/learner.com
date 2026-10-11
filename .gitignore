@@ -24,3 +24,7 @@ yarn-error.log*
 
 # macOS / editor
 .DS_Store
+
+# testing / certificates
+/coverage
+*.pem
