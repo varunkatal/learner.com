@@ -1,0 +1,26 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# Next.js / build output
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# env files — secrets stay local; .env.example is committed
+.env*
+!.env.example
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vercel
+.vercel
+
+# macOS / editor
+.DS_Store
