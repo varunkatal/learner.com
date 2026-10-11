@@ -15,8 +15,9 @@ export function Hero() {
             <span className="text-brand-ink">one clear lesson</span> at a time.
           </h1>
           <p className="mt-5 max-w-xl text-lg">
-            {siteConfig.name} has chapter-by-chapter video lessons that follow
-            your NCERT textbook, so you always know what to watch next.
+            {siteConfig.name} has chapter-by-chapter video lessons and live
+            classes that follow your NCERT textbook, so you always know what to
+            watch next.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/classes" size="lg">

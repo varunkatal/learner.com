@@ -28,11 +28,11 @@ export default function AboutPage() {
         </p>
 
         <h2>Who teaches the lessons</h2>
-        {/* TODO(Varun): replace with your own bio. */}
         <p>
-          The lessons are taught by Varun, a teacher of Maths and Science. [Add
-          a few lines about your teaching experience, the classes you have
-          taught, and what you enjoy about teaching.]
+          The lessons are taught by Varun, a teacher of Maths and Science. I’m
+          an engineer by education and a teacher by choice, with more than three
+          years of teaching experience. I love making difficult concepts simple
+          and helping students learn with confidence.
         </p>
 
         <h2>What makes it different</h2>
@@ -46,8 +46,10 @@ export default function AboutPage() {
             data.
           </li>
           <li>Notes for every lesson, so revision is quick.</li>
+          <li>Live classes where you can ask questions in the chat.</li>
           <li>
-            A mix of free and paid lessons, so anyone can start learning today.
+            Free lessons for everyone, and an affordable membership for the full
+            course.
           </li>
         </ul>
       </Prose>

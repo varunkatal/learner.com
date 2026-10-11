@@ -3,7 +3,7 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getClasses } from "@/lib/catalog";
 
-// Placeholder until real free videos exist (Phase 2): previews the first Maths chapter of each class.
+// Placeholder until real lessons exist (Phase 3): previews the first Maths chapter of each class.
 export async function FreeLessons() {
   const classes = await getClasses();
   const previews = classes.flatMap((cls) => {

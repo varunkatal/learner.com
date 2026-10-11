@@ -1,37 +1,39 @@
-# Educational Video Platform — Roadmap
+# Educational Video Platform — Roadmap (Plan A: Zero Cost)
 
 > Owner: Varun · Started: October 2026
-> Working name: **[SITE NAME]** · Domain: **[DOMAIN]** (to be decided)
+> Working name: **LearnerHub** · Address: `learnerhub.<account>.workers.dev` (free) → custom domain later
+> Target: up to **50 students** · Running cost: **₹0/month**
 
-A separate educational website where Varun uploads recorded lessons, offers a mix of **free and paid** content, runs **live classes**, and later ships **Android and iPhone apps** on the same backend.
+A website where Varun's students log in, watch lessons in order (Class → Subject → Chapter), download notes, and join live classes. Some lessons are **free**, the rest are for **members** who pay Varun directly by UPI.
 
 ---
 
 ## Guiding principles
 
-1. **One phase at a time.** Finish, test with real videos and real users, then move on.
-2. **Simple and working beats feature-rich.** Every phase ends with something usable.
-3. **Videos never live on our own server.** A video hosting service stores, converts and streams them. Our site stores only _information about_ videos.
-4. **Build for mobile first.** Most students will watch on phones over mobile data.
-5. **Build the backend once.** The website and future apps share the same API and database.
+1. **₹0 running cost.** Use only free plans. Upgrade only when a real problem appears (see "Future upgrades").
+2. **One phase at a time.** Finish, test with real students, then move on.
+3. **Simple and working beats feature-rich.**
+4. **Mobile first.** Most students watch on phones.
+5. **Easy to upgrade later.** Videos, payments and hosting are each kept behind one small module so they can be swapped without rebuilding.
 
 ---
 
-## Tech stack
+## Zero-cost stack
 
-| Layer                          | Choice                                                        | Why                                                             |
-| ------------------------------ | ------------------------------------------------------------- | --------------------------------------------------------------- |
-| Website                        | Next.js (App Router) + TypeScript + Tailwind CSS              | Already used on mathslearner; SEO-friendly; API routes built in |
-| Hosting                        | Vercel                                                        | Free tier to start, easy deploys from GitHub                    |
-| Domain / DNS                   | Hostinger                                                     | Already familiar                                                |
-| Database                       | MongoDB Atlas + Mongoose                                      | Already familiar; flexible for course structure                 |
-| Auth                           | Auth.js (NextAuth) — email/password + Google login            | Role-based sessions (student / admin)                           |
-| Video hosting                  | Cloudflare Stream **or** Bunny Stream (final pick in Phase 2) | Adaptive quality, CDN, signed URLs; Cloudflare also does live   |
-| Files (notes PDFs, thumbnails) | Cloudinary or Cloudflare R2                                   | Cheap file storage                                              |
-| Payments                       | Razorpay                                                      | Indian payments: UPI, cards, netbanking                         |
-| Email                          | Resend (or similar)                                           | Welcome, password reset, payment receipts                       |
-| Live streaming                 | OBS Studio → video host's live input                          | Free software, professional output                              |
-| Mobile apps                    | PWA first → Expo (React Native)                               | Instant install now; store apps later on same API               |
+| Need            | Choice                                                                   | Cost                                        |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------- |
+| Website         | Next.js (App Router) + TypeScript + Tailwind CSS                         | Free                                        |
+| Hosting         | Cloudflare Workers (free plan) via OpenNext adapter                      | ₹0                                          |
+| Database        | MongoDB Atlas free cluster (M0) + Mongoose                               | ₹0                                          |
+| Login           | Auth.js with **Google login only** (no passwords, no email service)      | ₹0                                          |
+| Recorded videos | **YouTube unlisted**, embedded on the site                               | ₹0                                          |
+| Live classes    | **YouTube Live unlisted**, link shown only to members                    | ₹0                                          |
+| Notes / PDFs    | Google Drive share links                                                 | ₹0                                          |
+| Payments        | **UPI QR code**; student submits transaction ID; Varun approves in admin | ₹0, keep 100%                               |
+| Mobile app      | Installable web app (PWA)                                                | ₹0                                          |
+| Domain          | Free `workers.dev` address                                               | ₹0 (custom domain optional, ~₹500–1,000/yr) |
+
+**Accepted trade-off:** unlisted YouTube links can be shared by a member. Reduced by keeping notes/tests on the site, saying the site name in each video, and re-uploading a video if its link leaks.
 
 ---
 
@@ -41,185 +43,153 @@ A separate educational website where Varun uploads recorded lessons, offers a mi
 Class (e.g. Class 9)
  └── Subject (e.g. Science)
       └── Chapter (e.g. Ch 1 – Matter in Our Surroundings)
-           └── Video (lesson) — marked FREE or PAID
-                └── Attachments (notes PDF, worksheet)
+           └── Lesson (YouTube video) — FREE or MEMBERS
+                └── Notes (Google Drive link)
 ```
 
-**Paid access model (decide in Phase 4):**
-
-- Option A — buy a whole **course** (e.g. "Class 9 Science full year")
-- Option B — monthly/yearly **subscription** to everything
-- Option C — both
+**Membership:** a student pays a fixed amount by UPI for a period (e.g. 1 month / 3 months / full year). After approval, all MEMBERS lessons and live classes unlock until the expiry date.
 
 ---
 
 ## Phase 0 — Setup (1–2 days)
 
-**Goal:** an empty project that runs locally and deploys online.
+**Goal:** an empty project that runs locally and is live online for free.
 
-- [ ] Decide site name and buy domain
+- [x] Decide site name (LearnerHub)
 - [x] Create GitHub repository
-- [x] Create Next.js + TypeScript + Tailwind project
+- [x] Create Next.js + TypeScript + Tailwind project, set up for Cloudflare Workers with `@opennextjs/cloudflare` (`npm run preview` runs it locally)
 - [x] Add `CLAUDE.md`, `ROADMAP.md`, `.env.example`, `.gitignore`
-- [ ] Create MongoDB Atlas cluster (new project, not mathslearner's)
-- [ ] Deploy to Vercel, connect domain via Hostinger DNS
-- [x] Set up ESLint + Prettier
+- [ ] Create MongoDB Atlas free cluster (new project)
+- [ ] **Test:** a page on Cloudflare Workers that reads one record from MongoDB. If this fails after reasonable effort, stop and decide the fallback with Varun before continuing
+- [ ] Deploy to `learnerhub.<account>.workers.dev`
 
-**Done when:** a "Coming soon" page is live on the real domain.
+**Done when:** a "Coming soon" page loads on the phone from the `workers.dev` address and shows data from MongoDB.
 
 ---
 
-## Phase 1 — Foundation & public pages (1–2 weeks)
+## Phase 1 — Public pages (1 week)
 
-**Goal:** a good-looking, fast, mobile-friendly public website.
+**Goal:** a clean, fast, mobile-friendly public website.
 
-- [x] Design system: colours, fonts, logo, button and card components
-- [x] Layout: header with navigation, footer, mobile menu
-- [x] Home page: hero, featured classes, how it works, free lessons preview, testimonials placeholder
-- [x] Classes page → Subjects page → Chapter list page (using sample data)
-- [x] About, Contact, Privacy Policy, Terms, Refund Policy pages (Razorpay requires the last three)
-- [ ] Database models: Class, Subject, Chapter (seed with real syllabus)
-- [x] SEO basics: page titles, descriptions, sitemap, Open Graph images
-- [ ] Lighthouse check on mobile (aim 90+ performance)
+- [x] Colours, fonts, logo, basic components (button, card, badge)
+- [x] Header with mobile menu, footer
+- [x] Home page: intro, classes offered, how membership works, a few free lessons
+- [x] About, Contact (WhatsApp link), Privacy Policy, Terms pages
+- [x] Classes → Subjects → Chapters pages (sample data)
+- [x] Page titles and descriptions for SEO
 
 **Done when:** a visitor on a phone can browse Class → Subject → Chapter smoothly.
 
 ---
 
-## Phase 2 — Video library & admin panel (2–3 weeks)
+## Phase 2 — Login and admin panel (1 week)
 
-**Goal:** Varun can upload a video from the browser and students can watch it.
+**Goal:** students sign in with Google; Varun manages the course structure.
 
-- [ ] Compare Cloudflare Stream vs Bunny Stream on current pricing, live support, India delivery; pick one
-- [ ] Video provider wrapper (`lib/video/`) so the provider can be swapped later
-- [ ] Admin login (role = admin) and protected `/admin` area
-- [ ] Admin: create/edit/reorder Classes, Subjects, Chapters
-- [ ] Admin: upload video **directly from browser to video host** (resumable upload, progress bar)
-- [ ] Webhook from video host → mark video `ready`, save duration and thumbnail
-- [ ] Admin: set title, description, chapter, order, **Free/Paid** flag, attach notes PDF
-- [ ] Public video page: player, description, notes download, next/previous lesson
-- [ ] Free videos playable by anyone
+- [ ] Google login with Auth.js
+- [ ] User saved in MongoDB on first login (role `student` by default)
+- [ ] Varun's Gmail set as `admin` via config
+- [ ] Protected `/admin` area (server-side role check)
+- [ ] Admin: add / edit / reorder / publish Classes, Subjects, Chapters
+- [ ] Student profile page: name, class, WhatsApp number
 
-**Done when:** upload a real 30-minute lesson, see it on a phone within minutes, in good quality on slow data.
+**Done when:** Varun can log in as admin and build the real syllabus; a student can log in with Gmail.
 
 ---
 
-## Phase 3 — Student accounts (2 weeks)
+## Phase 3 — Video lessons (1 week)
 
-**Goal:** students sign up and the site remembers them.
+**Goal:** Varun pastes a YouTube link and the lesson appears in the right chapter.
 
-- [ ] Sign up / login with email + password and Google
-- [ ] Email verification and password reset
-- [ ] Student dashboard: "Continue watching", recently added, my courses
-- [ ] Watch progress saved (resume where left off, mark lesson complete)
-- [ ] Chapter progress bar (e.g. 6 of 10 lessons done)
-- [ ] Profile page: name, class, phone (optional)
-- [ ] Admin: list of students, basic stats (sign-ups, most-watched videos)
+- [ ] Admin: add lesson — paste YouTube link (site extracts the video ID), title, description, chapter, order, FREE / MEMBERS, notes link
+- [ ] Lesson page: embedded player (`youtube-nocookie.com`), description, notes button, next / previous lesson
+- [ ] FREE lessons: anyone can watch
+- [ ] MEMBERS lessons: video ID is **only sent from the server to active members**; others see a locked card with "Become a member"
+- [ ] Chapter page shows lock icons on members-only lessons
 
-**Done when:** a student can log in on phone, stop halfway, and resume on laptop at the same point.
-
-**Milestone:** soft launch with free content only.
+**Done when:** a free lesson plays for a logged-out visitor, and a members-only lesson shows as locked.
 
 ---
 
-## Phase 4 — Payments & paid content (2–3 weeks)
+## Phase 4 — Membership by UPI (1 week)
 
-**Goal:** paid videos are locked and can be unlocked by paying.
+**Goal:** students pay by UPI and Varun unlocks them in two taps.
 
-- [ ] Decide pricing model (course / subscription / both)
-- [ ] Razorpay account + KYC; test mode first
-- [ ] Course/Plan model with price and validity period
-- [ ] Checkout flow → Razorpay → webhook verifies payment → grant access
-- [ ] Paid videos use **signed, expiring playback URLs** (generated only for students with access)
-- [ ] Locked state on paid videos: preview/thumbnail + "Unlock" button
-- [ ] Purchase history and GST-ready receipts emailed to student
-- [ ] Admin: payments list, grant/revoke access manually, coupon codes
-- [ ] Access expiry handled automatically
+- [ ] Membership plans in `config/plans.ts` (name, price, days)
+- [ ] "Become a member" page: choose plan, UPI QR code + UPI ID, amount shown
+- [ ] Student submits UPI transaction ID (UTR) after paying → request saved as `pending`
+- [ ] Admin: pending requests list → check UPI app → **Approve** / **Reject**
+- [ ] Approve sets membership `active` with expiry date
+- [ ] Student sees status: pending / active (valid till …) / expired
+- [ ] Expired members automatically lose access; renew button shown
+- [ ] Admin: manually add or extend a student's membership (for cash payments)
 
-**Done when:** a test payment unlocks a paid video, and the video link does not work if copied to a logged-out browser.
+**Done when:** a test student pays ₹1 by UPI, submits the UTR, gets approved, and the members-only lessons unlock.
 
-**Milestone:** public launch with free + paid content.
-
----
-
-## Phase 5 — Live classes (2–3 weeks)
-
-**Goal:** Varun teaches live; recordings land in the library automatically.
-
-- [ ] Set up live input on video host; connect OBS on laptop
-- [ ] Admin: schedule a live class (title, time, free/paid, class/subject)
-- [ ] Students see upcoming live classes + reminder email
-- [ ] Live page: player with low delay + live chat (real-time)
-- [ ] Admin chat moderation (delete message, mute student)
-- [ ] After class: recording auto-saved as a video in the right chapter
-- [ ] Paid live classes visible only to students with access
-
-**Done when:** a 1-hour live class runs smoothly for test students and appears as a recording afterwards.
+**Milestone:** launch to the first batch of students.
 
 ---
 
-## Phase 6 — Installable web app (PWA) (1 week)
+## Phase 5 — Student dashboard and progress (1 week)
 
-**Goal:** students can "install" the site on Android and iPhone home screens.
+**Goal:** students know where they left off.
 
-- [ ] Web app manifest, app icons, splash screen
+- [ ] Track watching with the YouTube IFrame Player API (save position every ~15 seconds)
+- [ ] Resume from last position
+- [ ] Mark lesson complete at ~90% watched
+- [ ] Dashboard: continue watching, chapter progress bars, membership expiry
+- [ ] Admin: student list with membership status and lessons completed
+
+**Done when:** a student stops halfway on the phone and resumes at the same point on a laptop.
+
+---
+
+## Phase 6 — Live classes (3–4 days)
+
+**Goal:** members join live classes from the website.
+
+- [ ] Admin: schedule a live class (title, date/time, class/subject, FREE / MEMBERS, YouTube Live link)
+- [ ] Students see "Upcoming live classes" on their dashboard
+- [ ] Live page: embedded YouTube Live player with live chat, visible only to allowed students
+- [ ] After class: one click turns the live class into a normal lesson in the right chapter (same YouTube video)
+- [ ] Optional: "Join live" WhatsApp message text generated for Varun to send
+
+**Done when:** a test live class runs from OBS → YouTube Live and members watch it on the website.
+
+---
+
+## Phase 7 — Installable app (PWA) (2–3 days)
+
+**Goal:** students "install" the site on Android and iPhone home screens.
+
+- [ ] Web app manifest, icons, splash colour
 - [ ] Offline fallback page
-- [ ] Push notifications for new videos and live classes (where supported)
-- [ ] Test install on Android Chrome and iPhone Safari
+- [ ] Install prompt / instructions page for Android and iPhone
 
-**Done when:** the site opens full-screen from the home-screen icon on both platforms.
-
----
-
-## Phase 7 — Native mobile apps (4–6 weeks)
-
-**Goal:** real apps on Google Play and Apple App Store.
-
-- [ ] Make sure every feature is available through clean API routes (`/api/v1/...`) with token auth
-- [ ] Expo (React Native) project: login, browse, player, dashboard, live
-- [ ] Native video player with the same signed URLs
-- [ ] Push notifications via Expo
-- [ ] Google Play developer account; Apple developer account
-- [ ] Check store rules on in-app payments for digital content before launch
-- [ ] Beta testing (Play internal testing, Apple TestFlight)
-- [ ] Store listings: screenshots, descriptions, privacy policy
-
-**Done when:** both apps are approved and live in the stores.
+**Done when:** the site opens full-screen from the home-screen icon on both phones.
 
 ---
 
-## Phase 8 — Growth features (ongoing, pick as needed)
+## Future upgrades (only when needed)
 
-- Quizzes after each lesson, with scores
-- Doubts / comments under videos
-- Downloadable lessons for offline viewing in the app
-- Certificates on course completion
-- Analytics: watch time, drop-off points, revenue
-- Teacher accounts (other teachers upload content)
-- Hindi / Punjabi interface
-
----
-
-## Running costs to watch
-
-Review monthly once real usage starts:
-
-- Video hosting (grows with minutes stored and minutes watched — the biggest cost)
-- MongoDB Atlas (free tier at first)
-- Vercel (free tier at first)
-- Domain renewal
-- Razorpay fees per transaction
-- Apple developer account (yearly) and Google Play account (one-time)
+| When this happens                        | Upgrade                                                | Approx. cost                      |
+| ---------------------------------------- | ------------------------------------------------------ | --------------------------------- |
+| Want a professional address              | Custom domain (`.in` / `.com`)                         | ~₹500–1,000/year                  |
+| Site outgrows the free hosting limit     | Cloudflare Workers Paid                                | $5/month                          |
+| Too many UPI approvals to handle by hand | Razorpay (automatic unlock)                            | ~2% per payment                   |
+| Members-only video links start leaking   | Cloudflare Stream for members' videos (expiring links) | Pay per minute watched            |
+| YouTube channel crosses ~500 subscribers | Consider YouTube channel memberships                   | YouTube keeps 30%                 |
+| Want Play Store / App Store apps         | Expo (React Native) app on the same backend            | $25 once (Google), $99/yr (Apple) |
+| More than ~50–100 students               | Review database and hosting usage                      | Free tiers may still be enough    |
 
 ---
 
 ## Open decisions
 
-| #   | Decision                          | Needed by |
-| --- | --------------------------------- | --------- |
-| 1   | Site name and domain              | Phase 0   |
-| 2   | Classes and subjects at launch    | Phase 1   |
-| 3   | Logo, colours, reference sites    | Phase 1   |
-| 4   | Expected hours of video per month | Phase 2   |
-| 5   | Cloudflare Stream vs Bunny Stream | Phase 2   |
-| 6   | Pricing model and prices          | Phase 4   |
+| #   | Decision                       | Needed by |
+| --- | ------------------------------ | --------- |
+| 1   | Site name                      | Phase 0   |
+| 2   | Classes and subjects at launch | Phase 1   |
+| 3   | Logo and colours               | Phase 1   |
+| 4   | Membership plans and prices    | Phase 4   |
+| 5   | UPI ID / QR code to display    | Phase 4   |

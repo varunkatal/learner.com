@@ -4,111 +4,102 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Read this file and `ROADMAP.md` before starting any task.
 
-## Repository state
-
-GitHub: https://github.com/varunkatal/learner.com (branch `main`). Phase 0's code setup and most of Phase 1 are built (see `ROADMAP.md` checkboxes). Folders marked "later" below don't exist yet.
-
-**Next.js 16.4 with Cache Components** (`cacheComponents` + `partialPrefetching` in `next.config.ts`). APIs differ from older Next.js — read the bundled docs in `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`). Key rules here:
-
-- Data functions are marked `"use cache"` so pages prerender as static HTML. Uncached data or runtime APIs (`cookies()`, `headers()`, `new Date()`) in a page must sit inside `<Suspense>` or the build fails.
-- Dynamic routes export `generateStaticParams`; `params` is a Promise (`await params`). Type props with the generated `PageProps<"/route">` / `LayoutProps<"/route">` helpers (`npx next typegen` regenerates them).
-- `dynamicParams` is unavailable; unknown slugs call `notFound()` (served with `noindex`).
-
-## How data flows (Phase 1)
-
-`lib/syllabus.ts` holds the NCERT 2026–27 syllabus (Classes 6–10, Maths + Science) and is the single source for now. Pages never read it directly — they call `lib/catalog.ts` (`getClasses`, `getClass`, `getSubject`). In Phase 2, swap those function bodies for MongoDB queries; pages stay unchanged. `npm run seed` copies the syllabus into MongoDB (idempotent upserts).
-
 ## Project
 
-**[mathslearner]** — an educational video platform for Indian school students (CBSE/ICSE). The owner, Varun, is a teacher who uploads recorded lessons, sells some content, and will run live classes. Later the same backend will power Android and iPhone apps.
+**LearnHub**: an educational video website for Indian school students (CBSE/ICSE), run by Varun, a teacher. Up to **50 students**. Students log in with Google, watch YouTube-hosted lessons organised by Class → Subject → Chapter → Lesson, download notes, and join live classes. Some lessons are free; the rest are for members who pay Varun by UPI.
 
-- Content: Class → Subject → Chapter → Video (+ notes PDFs)
-- Access: mix of **free** and **paid** videos
-- Live classes: planned for Phase 5
-- Mobile apps: PWA in Phase 6, Expo (React Native) in Phase 7
+**Hard rule: running cost must stay ₹0.** Use only free plans. Never add a paid service, paid API or paid plan without Varun's explicit approval. Paid options (custom domain, Razorpay, Cloudflare Stream, Expo store apps) are listed under "Future upgrades" in `ROADMAP.md` — don't build them early.
 
-**Current phase:** Phase 1 — Foundation & public pages (Phase 0 still needs domain, MongoDB Atlas and Vercel deploy). Update this line when a phase is completed.
+**Current phase:** Phase 0 — Setup (left: MongoDB Atlas + Workers test, first deploy). Phase 1 pages are built. Update this line when a phase is completed.
+
+## Repository state
+
+GitHub: https://github.com/varunkatal/learner.com (branch `main`). The project was re-planned in October 2026 from a paid stack (Vercel, Razorpay, Cloudflare/Bunny Stream, Resend) to the zero-cost plan described here; Phase 1 pages from the old plan were kept and reworded.
+
+**How data flows now:** `lib/syllabus.ts` holds the NCERT 2026–27 syllabus (Classes 6–10, Maths + Science) and is the only data source so far. Pages never read it directly — they call `lib/catalog.ts` (`getClasses`, `getClass`, `getSubject`). In Phase 2, swap those function bodies for MongoDB queries; pages stay unchanged. `npm run seed` copies the syllabus into MongoDB (idempotent upserts via `models/`).
+
+**Next.js on Cloudflare — constraints found while setting up:**
+
+- Next.js is pinned to **16.3.8** (with `eslint-config-next` to match). Next 16.4 crashes every request on `@opennextjs/cloudflare` 1.20.x (`Unexpected loadManifest(/.next/server/preview-props.json)`, opennextjs-cloudflare issue #1355). Upgrade only after an adapter release fixes it, and test with `npm run preview`.
+- **Cache Components (`cacheComponents`, `"use cache"`) are off**: on Workers they made requests hang. Pages are plain SSG: dynamic routes export `generateStaticParams`, and unknown slugs call `notFound()`. `params` is still a Promise (`await params`); type props with the generated `PageProps<"/route">` helpers.
+- `open-next.config.ts` uses the read-only **static-assets incremental cache** (no R2, which needs a card on file). Prerendered pages are served from it; "Failed to set to read-only cache" lines in `wrangler dev` logs are expected noise. ISR/revalidation won't work with this cache.
+- Free-plan Worker limit is 3 MiB compressed; the Phase 1 build is about 2.0 MiB (Mongoose isn't bundled into pages yet). Check with `npx wrangler deploy --dry-run --outdir /tmp/w`.
+- Next.js 16 APIs differ from older versions: read `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`).
 
 ## How to work with Varun
 
-- Work **one phase at a time**, following `ROADMAP.md`. Do not build features from later phases unless asked.
-- **Explain what you are building and why** before and after each step. Varun wants to understand the code, not just receive it.
-- Prefer **simple, working solutions** over clever or feature-heavy ones.
-- Deliver in small steps that can be run and tested immediately. Give the exact terminal commands to run.
-- When finishing a task, tick the matching checkbox in `ROADMAP.md`.
-- Ask before adding a new paid service or a large dependency.
-- Varun works on a Mac in VS Code. Watch for wrong-directory and port-conflict issues when giving commands.
+- Varun is a beginner developer. **Explain what you are building and why** before and after each step, in simple language.
+- Work **one phase at a time**, following `ROADMAP.md`. Don't build later-phase features unless asked.
+- Deliver small steps that can be run and tested immediately. Give exact terminal commands.
+- Prefer the **simplest working solution**. Avoid extra libraries unless they clearly save effort.
+- Tick the matching checkbox in `ROADMAP.md` when a task is finished.
+- Varun works on a Mac in VS Code. Watch for wrong-directory, wrong Node version and port-conflict issues.
 
-## Tech stack
+## Tech stack (all free)
 
-- **Framework:** Next.js (App Router), TypeScript, React Server Components by default
-- **Styling:** Tailwind CSS; reusable UI components in `components/ui/`
-- **Database:** MongoDB Atlas with Mongoose
-- **Auth:** Auth.js (NextAuth) — credentials + Google; JWT sessions with `role: "student" | "admin"`
-- **Video:** Cloudflare Stream or Bunny Stream (decided in Phase 2), always accessed through `lib/video/`
-- **Files:** Cloudinary or Cloudflare R2 for PDFs and images
-- **Payments:** Razorpay (Phase 4)
-- **Email:** Resend
-- **Hosting:** Vercel; DNS on Hostinger
-- **Validation:** Zod for all API inputs and forms
+- **Framework:** Next.js (App Router), TypeScript, Server Components by default
+- **Styling:** Tailwind CSS; reusable components in `components/ui/`
+- **Hosting:** Cloudflare Workers free plan, deployed with the OpenNext adapter (`@opennextjs/cloudflare`). Keep the bundle small: the free plan's Worker size limit is 3 MiB compressed
+- **Database:** MongoDB Atlas free cluster (M0) with Mongoose. Cache the connection. Whether Mongoose works on Workers must be proven in Phase 0; if it doesn't after reasonable effort, stop and agree a fallback with Varun
+- **Auth:** Auth.js (NextAuth), **Google provider only**, JWT sessions with `role: "student" | "admin"`. No passwords, no email sending
+- **Videos and live:** YouTube unlisted videos and YouTube Live, embedded via `https://www.youtube-nocookie.com/embed/VIDEO_ID`; progress via the YouTube IFrame Player API
+- **Notes:** Google Drive share links stored as URLs
+- **Payments:** manual UPI. The student pays to Varun's UPI ID / QR and submits the UTR; admin approves
+- **Validation:** Zod for every form and API input
+
+Don't add video upload systems, payment gateways, email services, file storage services or paid analytics.
 
 ## Folder structure (planned)
 
 ```
 app/
-  (public)/            # home, classes → subject → chapter list, about, contact, legal pages
-  (auth)/              # later: login, signup, reset password
-  (student)/dashboard/ # later: student area (login required)
-  admin/               # later: admin panel (role = admin)
-  api/v1/              # later: all API routes — versioned so mobile apps can use them
-  sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg
+  (public)/            # home, classes, subjects, chapters, lesson pages, about, legal
+  (student)/dashboard/ # student area (login required)
+  membership/          # plans, UPI payment page, status
+  live/                # live class pages
+  admin/               # admin panel (role = admin)
+  api/v1/              # API routes, versioned so a future mobile app can reuse them
 components/
-  ui/                  # Button, ButtonLink, Card, Badge, Container, SectionHeading, Breadcrumbs, Prose
-  layout/              # header, mobile menu (only client component), footer, logo
-  catalog/             # class/subject cards, chapter list
-  home/                # home page sections
-  video/               # later: player, upload, lesson list
+  ui/                  # buttons, cards, badges, inputs, modals
+  lesson/              # YouTube player, lesson list, locked card
+  layout/              # header, footer, mobile nav
 lib/
-  syllabus.ts          # NCERT syllabus data + slugs (source of truth in Phase 1)
-  catalog.ts           # data access used by pages ("use cache")
   db.ts                # cached Mongoose connection
-  auth.ts, video/, payments/, validators/   # later
-models/                # Mongoose models (Class, Subject, Chapter so far)
-scripts/seed.ts        # seeds MongoDB from lib/syllabus.ts
+  auth.ts              # Auth.js config
+  access.ts            # canWatch(user, lesson): the single place for access rules
+  video.ts             # YouTube helpers (extract ID from any YouTube URL, embed URL)
+  validators/          # Zod schemas
+models/                # Mongoose models
 config/
-  site.ts              # site name, contact, legal details, nav, testimonials
+  site.ts              # site name, WhatsApp number, social links, admin emails
+  plans.ts             # membership plans: id, name, priceRupees, days
+  payment.ts           # UPI ID, payee name, QR image path
 ```
 
-Keep configuration (site name, prices, limits, feature flags) in `config/` — never hard-code it inside components.
+Keep configuration in `config/`. Never hard-code the site name, prices, UPI ID or admin emails inside components.
 
 ## Data models
 
-- **User** — name, email, passwordHash (optional for Google), image, role, grade, phone, emailVerified, createdAt
-- **Class** — name (e.g. "Class 9"), slug, order, isPublished
-- **Subject** — classId, name, slug, book (textbook name), order, thumbnail, isPublished
-- **Chapter** — subjectId, title, slug, order (across the subject), part (textbook Part I/II), number (as printed within its part), isPublished
-- **Video** — chapterId, title, slug, description, order, access (`free` | `paid`), provider, providerVideoId, status (`uploading` | `processing` | `ready` | `failed`), durationSec, thumbnailUrl, attachments[{ title, url }], isPublished, createdAt
-- **Progress** — userId, videoId, positionSec, completed, updatedAt (unique on userId + videoId)
-- **Product** (Phase 4) — type (`course` | `subscription`), title, price (paise), validityDays, includes (class/subject IDs)
-- **Purchase** (Phase 4) — userId, productId, razorpayOrderId, razorpayPaymentId, amount, status, validUntil
-- **LiveSession** (Phase 5) — title, classId, subjectId, scheduledAt, access, status (`scheduled` | `live` | `ended`), providerLiveId, recordingVideoId
+- **User**: name, email, image, role (`student` | `admin`), grade, whatsapp, membership { status (`none` | `active` | `expired`), planId, validUntil }, createdAt
+- **Class**: name, slug, order, isPublished
+- **Subject**: classId, name, slug, order, isPublished
+- **Chapter**: subjectId, title, slug, order, isPublished
+- **Lesson**: chapterId, title, slug, description, order, access (`free` | `members`), provider (`youtube`), youtubeId, notesUrl, durationSec (optional), isPublished, createdAt
+- **PaymentRequest**: userId, planId, amountRupees, utr, status (`pending` | `approved` | `rejected`), adminNote, createdAt, reviewedAt
+- **Progress**: userId, lessonId, positionSec, completed, updatedAt (unique on userId + lessonId)
+- **LiveClass**: title, classId, subjectId, scheduledAt, access, youtubeId, status (`scheduled` | `live` | `ended`), lessonId (set after converting to a lesson)
 
-Store money in **paise** as integers. Store times in **UTC**; display in IST (Asia/Kolkata).
+Store times in **UTC** and display them in IST (Asia/Kolkata). A membership is active only if `status === "active"` and `validUntil > now`. Check expiry on every access, not with a background job.
 
-## Video rules (important)
+## Access rules (important)
 
-- **Never upload video files through our own server or Vercel functions.** Request a one-time upload URL from the video host in an API route, then upload **directly from the browser** to the host (resumable upload with progress).
-- The video host notifies us through a **webhook** when processing finishes; verify the webhook signature, then set `status: "ready"`, duration and thumbnail.
-- Free videos may use public playback. **Paid videos must use signed, short-lived playback URLs**, generated server-side only after checking the user's access.
-- All provider-specific code lives in `lib/video/`. The rest of the app calls functions like `createUploadUrl()`, `getPlaybackUrl(video, user)`, `handleWebhook()` and never imports the provider SDK directly.
-
-## Security rules
-
-- Secrets only in `.env.local` (and Vercel env settings). Keep `.env.example` updated with variable **names**, never values.
-- Check auth and role on the **server** in every admin route and API route — never trust the client.
-- Validate every request body with Zod.
-- Verify Razorpay payment signatures and webhooks server-side before granting access.
-- Never expose stream keys, API tokens or signing keys to the browser.
+- All access decisions go through `lib/access.ts`.
+- **Members-only YouTube IDs must never reach a non-member's browser.** Fetch lessons on the server; for locked lessons send only the title, description and lock state, never `youtubeId`. The same applies to members-only live classes.
+- Admin pages and admin API routes check `role === "admin"` on the server every time.
+- UTR must be unique across PaymentRequests, so one payment can't be submitted twice.
+- Never trust the client for role, membership or prices; read prices from `config/plans.ts` on the server.
+- Accepted limitation: a member can copy an unlisted YouTube link. Don't attempt complex workarounds; the planned fix is moving members' videos to Cloudflare Stream later.
+- Secrets go only in `.env.local` (and Cloudflare secrets in production). Keep `.env.example` updated with variable names only.
 
 ## Environment variables
 
@@ -117,54 +108,44 @@ MONGODB_URI=
 AUTH_SECRET=
 AUTH_GOOGLE_ID=
 AUTH_GOOGLE_SECRET=
-VIDEO_PROVIDER=          # cloudflare | bunny
-VIDEO_API_TOKEN=
-VIDEO_ACCOUNT_ID=
-VIDEO_SIGNING_KEY=
-VIDEO_WEBHOOK_SECRET=
-RAZORPAY_KEY_ID=
-RAZORPAY_KEY_SECRET=
-RAZORPAY_WEBHOOK_SECRET=
-RESEND_API_KEY=
 NEXT_PUBLIC_SITE_URL=
 ```
 
 ## Commands
 
 ```
-npm run dev           # local dev server (http://localhost:3000)
-npm run build         # production build — run before every deploy
+npm run dev           # local dev server (http://localhost:3000), Node runtime
+npm run build         # plain Next.js build
+npm run preview       # Cloudflare build + run in the real Workers runtime (http://localhost:8787): use before every deploy
+npm run deploy        # Cloudflare build + deploy to workers.dev (needs `npx wrangler login` once)
 npm run lint          # ESLint
-npm run format        # Prettier (also sorts Tailwind classes)
-npm run format:check
+npm run format        # Prettier (also sorts Tailwind classes); format:check to verify
 npm run seed          # copy lib/syllabus.ts into MongoDB (needs MONGODB_URI in .env.local)
 npx tsc --noEmit      # type-check
 ```
 
-No test runner is set up yet.
+No test runner is set up.
 
 ## Code style
 
-- TypeScript strict mode; no `any` unless explained.
-- Server Components by default; add `"use client"` only for interactive parts.
-- Small components; one component per file.
-- Mobile-first Tailwind classes; test every page at phone width.
-- Meaningful names; short comments explaining _why_, not _what_.
+- TypeScript strict; avoid `any`.
+- `"use client"` only for interactive parts (player, forms, menus).
+- One component per file; short comments explaining _why_.
 - API responses: `{ ok: true, data }` or `{ ok: false, error }`.
 
 ## Design
 
-- Clean, friendly, student-focused; large readable text; high contrast.
-- Colours are Tailwind v4 tokens in the `@theme` block of `app/globals.css` (there is no `tailwind.config`). Use token classes (`bg-brand`, `text-ink`, `bg-blush`, `bg-lavender`, `text-body`, `text-muted`, `border-line`, `rounded-card`, `shadow-card`), never raw hex values in components.
-- Pink (`brand`) for primary CTAs and highlights; indigo (`ink`) for headings, nav, footer; white dominant, blush/lavender used sparingly; 16px rounded cards.
-- For pink **text** use `text-brand-ink` (#D81B55) — `#FF2D68` is only 3.6:1 on white. `text-muted` is #6B7091 (slightly darker than the palette's #74799A) to pass 4.5:1.
-- Font: Plus Jakarta Sans via `next/font` (`--font-jakarta`).
-- Base element styles go inside `@layer base` in `globals.css`; unlayered CSS overrides Tailwind utilities.
-- Fast on slow mobile data: optimise images with `next/image`, lazy-load video players.
+- Clean, friendly, student-focused; large readable text; high contrast; mobile-first (check every page at phone width).
+- Colours are Tailwind v4 tokens in the `@theme` block of `app/globals.css` (there is no `tailwind.config`). Use token classes (`bg-brand`, `text-ink`, `bg-blush`, `bg-lavender`, `text-body`, `text-muted`, `border-line`, `bg-surface`, `rounded-card`, `shadow-card`), never raw hex values in components.
+- Pink (`brand`, #FF2D68) for primary CTAs and highlights; indigo (`ink`) for headings, nav, footer; white dominant, blush/lavender used sparingly; 16px rounded cards, subtle shadows. Keep the same colours across every area (home, lessons, live, dashboard, admin).
+- For pink **text** use `text-brand-ink` (#D81B55): #FF2D68 is only 3.6:1 on white. `text-muted` is #6B7091 (not the palette's #74799A) to pass 4.5:1.
+- Font: Plus Jakarta Sans via `next/font` (`--font-jakarta`). Base element styles go inside `@layer base` in `globals.css`; unlayered CSS overrides Tailwind utilities.
+- Fast on slow mobile data: lazy-load YouTube players (show a thumbnail first, load the player on tap).
 
 ## Before marking any task done
 
 1. `npm run build` passes with no errors.
 2. Page works at phone width and desktop width.
-3. Logged-out, student and admin views checked where relevant.
-4. `ROADMAP.md` checkbox ticked; "Current phase" line above updated if a phase finished.
+3. Logged-out, student, member and admin views checked where relevant.
+4. No members-only YouTube ID visible to a non-member (check the page source).
+5. `ROADMAP.md` checkbox ticked; "Current phase" line updated if a phase finished.

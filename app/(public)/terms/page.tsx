@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { Container } from "@/components/ui/container";
 import { Prose } from "@/components/ui/prose";
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/terms" },
 };
 
-// DRAFT — have this reviewed before taking payments.
+// DRAFT — Varun to review before launch. Square-bracket values are placeholders to decide.
 export default function TermsPage() {
   const { name, contact, legal } = siteConfig;
 
@@ -23,15 +22,16 @@ export default function TermsPage() {
       />
       <Prose>
         <p>
-          These terms apply to your use of {name}, operated by{" "}
-          {legal.businessName}. By using the website you agree to them.
+          These terms apply to your use of {name}, run by {legal.ownerName}. By
+          using the website you agree to them.
         </p>
 
         <h2>Your account</h2>
         <ul>
+          <li>You sign in with your own Google account.</li>
           <li>
-            Keep your login details private. Each account is for one student
-            only.
+            Each account and membership is for one student only. Please
+            don&apos;t share your account.
           </li>
           <li>
             Students under 18 should use the site with the permission of a
@@ -42,37 +42,51 @@ export default function TermsPage() {
 
         <h2>Lessons and content</h2>
         <ul>
-          <li>
-            Some lessons are free; others need a paid course or subscription.
-          </li>
+          <li>Some lessons are free for everyone; the rest are for members.</li>
           <li>
             All videos, notes and other materials belong to {name}. They are for
             your personal study only. Do not download, record, copy, share or
-            resell them.
+            resell them, and do not share video links with anyone else.
           </li>
           <li>We may update, reorder or improve lessons over time.</li>
         </ul>
 
-        <h2>Payments</h2>
+        <h2>Membership and payments</h2>
+        <ul>
+          <li>Prices are shown in Indian Rupees (₹) on the membership page.</li>
+          <li>
+            You pay by UPI to the UPI ID or QR code shown on the site, then
+            enter your UPI transaction ID (UTR). Membership starts once we have
+            checked the payment, usually within 24 hours.
+          </li>
+          <li>
+            Membership lasts for the number of days in the plan you chose. You
+            can renew at any time.
+          </li>
+          <li>
+            Only pay to the UPI ID shown on this website. We will never ask for
+            your UPI PIN.
+          </li>
+        </ul>
+
+        <h2>Refunds</h2>
         <ul>
           <li>
-            Prices are shown in Indian Rupees (₹) and include applicable taxes
-            unless stated otherwise.
-          </li>
-          <li>Payments are processed securely by Razorpay.</li>
-          <li>
-            Paid access lasts for the period shown at the time of purchase.
+            If you paid but your membership wasn&apos;t started, or you paid
+            twice by mistake, contact us and we will fix it or refund you in
+            full.
           </li>
           <li>
-            Refunds are covered by our{" "}
-            <Link href="/refund-policy">Refund Policy</Link>.
+            You can ask for a full refund within <strong>15 days</strong> of
+            your membership starting. After that, payments are non-refundable.
           </li>
+          <li>Refunds are sent back by UPI to the account you paid from.</li>
         </ul>
 
         <h2>Fair use</h2>
         <p>
           Don&apos;t try to break, overload or get around the security of the
-          website, or access content you haven&apos;t paid for.
+          website, or access members&apos; content without a membership.
         </p>
 
         <h2>Limitation of liability</h2>
@@ -83,14 +97,15 @@ export default function TermsPage() {
 
         <h2>Governing law</h2>
         <p>
-          These terms are governed by the laws of India. Courts in [city, state]
+          These terms are governed by the laws of India. Courts in {legal.city}{" "}
           have jurisdiction.
         </p>
 
         <h2>Contact</h2>
         <p>
-          {legal.businessName}, {legal.address}. Email:{" "}
-          <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+          {legal.ownerName}. Email:{" "}
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>, or message us
+          on WhatsApp (see the Contact page).
         </p>
       </Prose>
     </Container>

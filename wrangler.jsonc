@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // The site address becomes learnerhub.<your-account>.workers.dev
+  "name": "learnerhub",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      // Self-reference binding; the service name must match "name" above.
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "learnerhub",
+    },
+  ],
+}

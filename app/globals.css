@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Learner design tokens — the single place brand colours live.
+  LearnerHub design tokens — the single place brand colours live.
   Use them as Tailwind classes, e.g. bg-brand, text-ink, border-line, rounded-card.
 */
 @theme {

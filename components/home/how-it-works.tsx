@@ -3,16 +3,16 @@ import { SectionHeading } from "@/components/ui/section-heading";
 
 const steps = [
   {
-    title: "Pick your class and subject",
-    text: "Choose your class, then Maths or Science. Chapters follow your NCERT textbook in the same order.",
+    title: "Sign in with Google",
+    text: "Use your Gmail account — no new password to remember. Free lessons are open to everyone.",
   },
   {
-    title: "Watch short, clear lessons",
-    text: "Each chapter is broken into focused video lessons that work well on a phone, even on slow data.",
+    title: "Pay by UPI",
+    text: "Choose a membership plan and pay with any UPI app. Then enter the transaction ID (UTR) on the site.",
   },
   {
-    title: "Revise with notes",
-    text: "Download the notes for each lesson and come back to any chapter before your tests and exams.",
+    title: "Unlock every lesson",
+    text: "Once your payment is checked, all members' lessons, notes and live classes open until your plan ends.",
   },
 ];
 
@@ -21,8 +21,9 @@ export function HowItWorks() {
     <section id="how-it-works" className="scroll-mt-20 py-16 sm:py-20">
       <Container>
         <SectionHeading
-          eyebrow="How it works"
-          title="Learning made simple"
+          eyebrow="Membership"
+          title="How membership works"
+          description="Start with the free lessons. Become a member when you're ready for the full course."
           align="center"
         />
         <ol className="mt-12 grid gap-6 md:grid-cols-3">

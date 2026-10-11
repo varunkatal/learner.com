@@ -23,7 +23,7 @@ export async function SiteFooter() {
           ))}
         </FooterColumn>
 
-        <FooterColumn title="Learner">
+        <FooterColumn title={siteConfig.name}>
           {[...siteConfig.nav, ...siteConfig.footerLinks].map((item) => (
             <FooterLink key={item.href} href={item.href}>
               {item.label}
