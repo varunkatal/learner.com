@@ -13,6 +13,7 @@ next-env.d.ts
 # env files — secrets stay local; .env.example is committed
 .env*
 !.env.example
+!.env.production
 
 # debug logs
 npm-debug.log*

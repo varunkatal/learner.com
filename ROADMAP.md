@@ -59,9 +59,9 @@ Class (e.g. Class 9)
 - [x] Create GitHub repository
 - [x] Create Next.js + TypeScript + Tailwind project, set up for Cloudflare Workers with `@opennextjs/cloudflare` (`npm run preview` runs it locally)
 - [x] Add `CLAUDE.md`, `ROADMAP.md`, `.env.example`, `.gitignore`
-- [ ] Create MongoDB Atlas free cluster (new project)
-- [ ] **Test:** a page on Cloudflare Workers that reads one record from MongoDB. If this fails after reasonable effort, stop and decide the fallback with Varun before continuing
-- [ ] Deploy to `learnerhub.<account>.workers.dev`
+- [x] Create MongoDB Atlas free cluster (new project)
+- [x] **Test:** a page on Cloudflare Workers that reads one record from MongoDB. If this fails after reasonable effort, stop and decide the fallback with Varun before continuing
+- [x] Deploy to `learnerhub.learnerhub.workers.dev`
 
 **Done when:** a "Coming soon" page loads on the phone from the `workers.dev` address and shows data from MongoDB.
 

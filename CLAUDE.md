@@ -10,7 +10,7 @@ Read this file and `ROADMAP.md` before starting any task.
 
 **Hard rule: running cost must stay ₹0.** Use only free plans. Never add a paid service, paid API or paid plan without Varun's explicit approval. Paid options (custom domain, Razorpay, Cloudflare Stream, Expo store apps) are listed under "Future upgrades" in `ROADMAP.md` — don't build them early.
 
-**Current phase:** Phase 0 — Setup (left: MongoDB Atlas + Workers test, first deploy). Phase 1 pages are built. Update this line when a phase is completed.
+**Current phase:** Phase 2 — Login and admin panel (Phases 0 and 1 done; live at https://learnerhub.learnerhub.workers.dev). Update this line when a phase is completed.
 
 ## Repository state
 
@@ -23,7 +23,10 @@ GitHub: https://github.com/varunkatal/learner.com (branch `main`). The project w
 - Next.js is pinned to **16.3.8** (with `eslint-config-next` to match). Next 16.4 crashes every request on `@opennextjs/cloudflare` 1.20.x (`Unexpected loadManifest(/.next/server/preview-props.json)`, opennextjs-cloudflare issue #1355). Upgrade only after an adapter release fixes it, and test with `npm run preview`.
 - **Cache Components (`cacheComponents`, `"use cache"`) are off**: on Workers they made requests hang. Pages are plain SSG: dynamic routes export `generateStaticParams`, and unknown slugs call `notFound()`. `params` is still a Promise (`await params`); type props with the generated `PageProps<"/route">` helpers.
 - `open-next.config.ts` uses the read-only **static-assets incremental cache** (no R2, which needs a card on file). Prerendered pages are served from it; "Failed to set to read-only cache" lines in `wrangler dev` logs are expected noise. ISR/revalidation won't work with this cache.
-- Free-plan Worker limit is 3 MiB compressed; the Phase 1 build is about 2.0 MiB (Mongoose isn't bundled into pages yet). Check with `npx wrangler deploy --dry-run --outdir /tmp/w`.
+- **Database access in pages and API routes goes through `withDB()` in `lib/db.ts`**, which opens a connection per request and closes it (`withDB((db) => db.model(ClassModel).findOne())`). A connection cached across requests hangs the next request on Workers. `connectDB()` (one shared connection) is only for Node scripts like `scripts/seed.ts`. Each request pays ~1s to connect; if a page needs several queries, do them inside one `withDB` call.
+- CPU: static pages use ~2 ms, a request that opens a MongoDB connection ~30 ms. The free plan's limit is 10 ms per request, yet these succeeded (outcome `ok`). Watch `npx wrangler tail` for `exceededCpu` once real pages use the database, and keep database work to pages that need it.
+- `/db-check` is a temporary Phase 0 page that reads MongoDB at request time; delete it once Phase 2 pages read from the database.
+- Free-plan Worker limit is 3 MiB compressed; with Mongoose bundled the build is about 2.3 MiB. Check with `npx wrangler deploy --dry-run --outdir /tmp/w`.
 - Next.js 16 APIs differ from older versions: read `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`).
 
 ## How to work with Varun
@@ -40,7 +43,7 @@ GitHub: https://github.com/varunkatal/learner.com (branch `main`). The project w
 - **Framework:** Next.js (App Router), TypeScript, Server Components by default
 - **Styling:** Tailwind CSS; reusable components in `components/ui/`
 - **Hosting:** Cloudflare Workers free plan, deployed with the OpenNext adapter (`@opennextjs/cloudflare`). Keep the bundle small: the free plan's Worker size limit is 3 MiB compressed
-- **Database:** MongoDB Atlas free cluster (M0) with Mongoose. Cache the connection. Whether Mongoose works on Workers must be proven in Phase 0; if it doesn't after reasonable effort, stop and agree a fallback with Varun
+- **Database:** MongoDB Atlas free cluster (M0), database `learnerhub`, with Mongoose. Works on Workers via `withDB()` (verified live). Atlas Network Access must allow `0.0.0.0/0`: Workers have no fixed IP, and a blocked IP shows up as "Too many subrequests" because the driver retries until the subrequest limit
 - **Auth:** Auth.js (NextAuth), **Google provider only**, JWT sessions with `role: "student" | "admin"`. No passwords, no email sending
 - **Videos and live:** YouTube unlisted videos and YouTube Live, embedded via `https://www.youtube-nocookie.com/embed/VIDEO_ID`; progress via the YouTube IFrame Player API
 - **Notes:** Google Drive share links stored as URLs
@@ -64,7 +67,7 @@ components/
   lesson/              # YouTube player, lesson list, locked card
   layout/              # header, footer, mobile nav
 lib/
-  db.ts                # cached Mongoose connection
+  db.ts                # withDB(): per-request Mongoose connection (connectDB() for scripts)
   auth.ts              # Auth.js config
   access.ts            # canWatch(user, lesson): the single place for access rules
   video.ts             # YouTube helpers (extract ID from any YouTube URL, embed URL)
@@ -103,6 +106,8 @@ Store times in **UTC** and display them in IST (Asia/Kolkata). A membership is a
 
 ## Environment variables
 
+Local secrets live in `.env.local` (git-ignored; `wrangler dev` reads it too). Production secrets are Cloudflare secrets (`npx wrangler secret put NAME`; `MONGODB_URI` is set). `NEXT_PUBLIC_SITE_URL` is baked in at build time from the committed `.env.production`; keep it out of `.env.local`, which would override it.
+
 ```
 MONGODB_URI=
 AUTH_SECRET=
@@ -117,7 +122,8 @@ NEXT_PUBLIC_SITE_URL=
 npm run dev           # local dev server (http://localhost:3000), Node runtime
 npm run build         # plain Next.js build
 npm run preview       # Cloudflare build + run in the real Workers runtime (http://localhost:8787): use before every deploy
-npm run deploy        # Cloudflare build + deploy to workers.dev (needs `npx wrangler login` once)
+npm run deploy        # Cloudflare build + deploy to workers.dev (if `npx wrangler login` hangs, use `npx wrangler login --device`)
+npx wrangler tail learnerhub   # live logs from the deployed site
 npm run lint          # ESLint
 npm run format        # Prettier (also sorts Tailwind classes); format:check to verify
 npm run seed          # copy lib/syllabus.ts into MongoDB (needs MONGODB_URI in .env.local)

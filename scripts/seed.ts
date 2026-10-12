@@ -9,7 +9,11 @@ import { ClassModel } from "../models/Class";
 import { SubjectModel } from "../models/Subject";
 import { ChapterModel } from "../models/Chapter";
 
-const upsert = { upsert: true, new: true, setDefaultsOnInsert: true } as const;
+const upsert = {
+  upsert: true,
+  returnDocument: "after",
+  setDefaultsOnInsert: true,
+} as const;
 
 async function seed() {
   await connectDB();
