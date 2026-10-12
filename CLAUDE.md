@@ -6,7 +6,7 @@ Read this file and `ROADMAP.md` before starting any task.
 
 ## Project
 
-**LearnHub**: an educational video website for Indian school students (CBSE/ICSE), run by Varun, a teacher. Up to **50 students**. Students log in with Google, watch YouTube-hosted lessons organised by Class → Subject → Chapter → Lesson, download notes, and join live classes. Some lessons are free; the rest are for members who pay Varun by UPI.
+**LearnerHub**: an educational video website for Indian school students (CBSE/ICSE), run by Varun, a teacher. Up to **50 students**. Students log in with Google, watch YouTube-hosted lessons organised by Class → Subject → Chapter → Lesson, download notes, and join live classes. Some lessons are free; the rest are for members who pay Varun by UPI.
 
 **Hard rule: running cost must stay ₹0.** Use only free plans. Never add a paid service, paid API or paid plan without Varun's explicit approval. Paid options (custom domain, Razorpay, Cloudflare Stream, Expo store apps) are listed under "Future upgrades" in `ROADMAP.md` — don't build them early.
 
@@ -25,8 +25,9 @@ GitHub: https://github.com/varunkatal/learner.com (branch `main`). The project w
 - `open-next.config.ts` uses the read-only **static-assets incremental cache** (no R2, which needs a card on file). Prerendered pages are served from it; "Failed to set to read-only cache" lines in `wrangler dev` logs are expected noise. ISR/revalidation won't work with this cache.
 - **Database access in pages and API routes goes through `withDB()` in `lib/db.ts`**, which opens a connection per request and closes it (`withDB((db) => db.model(ClassModel).findOne())`). A connection cached across requests hangs the next request on Workers. `connectDB()` (one shared connection) is only for Node scripts like `scripts/seed.ts`. Each request pays ~1s to connect; if a page needs several queries, do them inside one `withDB` call.
 - CPU: static pages use ~2 ms, a request that opens a MongoDB connection ~30 ms. The free plan's limit is 10 ms per request, yet these succeeded (outcome `ok`). Watch `npx wrangler tail` for `exceededCpu` once real pages use the database, and keep database work to pages that need it.
+- **Auth (Auth.js v5 beta, `next-auth@5.0.0-beta.32`, pinned):** config in `lib/auth.ts`. On sign-in the `jwt` callback upserts the User (via `withDB`) and puts `userId` + `role` in the JWT cookie; admin = email listed in `siteConfig.adminEmails`, recalculated every sign-in. Public pages stay static: the header's `AccountButton` is a client component reading `useSession()` (`SessionProvider` in `components/providers.tsx`). Admin pages call `requireAdmin()` (done once in `app/admin/layout.tsx`; API routes must call it themselves). Google OAuth redirect URIs registered: `localhost:3000`, `localhost:8787` and the workers.dev address, each with `/api/auth/callback/google`. Google client secrets are only shown once at creation; make a new one under Clients → client → "Add secret".
 - `/db-check` is a temporary Phase 0 page that reads MongoDB at request time; delete it once Phase 2 pages read from the database.
-- Free-plan Worker limit is 3 MiB compressed; with Mongoose bundled the build is about 2.3 MiB. Check with `npx wrangler deploy --dry-run --outdir /tmp/w`.
+- Free-plan Worker limit is 3 MiB compressed; with Mongoose and Auth.js the build is about 2.6 MiB, so be careful adding dependencies. Check with `npx wrangler deploy --dry-run --outdir /tmp/w`.
 - Next.js 16 APIs differ from older versions: read `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`).
 
 ## How to work with Varun
@@ -106,7 +107,7 @@ Store times in **UTC** and display them in IST (Asia/Kolkata). A membership is a
 
 ## Environment variables
 
-Local secrets live in `.env.local` (git-ignored; `wrangler dev` reads it too). Production secrets are Cloudflare secrets (`npx wrangler secret put NAME`; `MONGODB_URI` is set). `NEXT_PUBLIC_SITE_URL` is baked in at build time from the committed `.env.production`; keep it out of `.env.local`, which would override it.
+Local secrets live in `.env.local` (git-ignored; `wrangler dev` reads it too). Production secrets are Cloudflare secrets (`npx wrangler secret put NAME`; `MONGODB_URI`, `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` are set; production `AUTH_SECRET` differs from the local one). `NEXT_PUBLIC_SITE_URL` is baked in at build time from the committed `.env.production`; keep it out of `.env.local`, which would override it.
 
 ```
 MONGODB_URI=

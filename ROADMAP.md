@@ -86,10 +86,10 @@ Class (e.g. Class 9)
 
 **Goal:** students sign in with Google; Varun manages the course structure.
 
-- [ ] Google login with Auth.js
-- [ ] User saved in MongoDB on first login (role `student` by default)
-- [ ] Varun's Gmail set as `admin` via config
-- [ ] Protected `/admin` area (server-side role check)
+- [x] Google login with Auth.js
+- [x] User saved in MongoDB on first login (role `student` by default)
+- [x] Varun's Gmail set as `admin` via config
+- [x] Protected `/admin` area (server-side role check)
 - [ ] Admin: add / edit / reorder / publish Classes, Subjects, Chapters
 - [ ] Student profile page: name, class, WhatsApp number
 

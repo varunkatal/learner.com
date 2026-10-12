@@ -20,6 +20,9 @@ export const siteConfig = {
     lastUpdated: "12 October 2026",
   },
 
+  // These Gmail addresses get the admin role when they sign in. Everyone else is a student.
+  adminEmails: ["varun03katal@gmail.com"] as string[],
+
   social: {
     youtube: "" as string,
     instagram: "" as string,

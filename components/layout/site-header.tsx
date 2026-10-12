@@ -2,6 +2,7 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Container } from "@/components/ui/container";
+import { AccountButton } from "./account-button";
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
 
@@ -24,7 +25,10 @@ export function SiteHeader() {
             Start learning
           </ButtonLink>
         </nav>
-        <MobileMenu items={siteConfig.nav} />
+        <div className="flex items-center gap-2">
+          <AccountButton />
+          <MobileMenu items={siteConfig.nav} />
+        </div>
       </Container>
     </header>
   );
