@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { getClasses } from "@/lib/catalog";
 
-// Tells Google which pages exist. Class and subject pages are added automatically from the syllabus.
+// Tells Google which pages exist. Published class and subject pages are read from the database.
+export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const url = (path: string) => `${siteConfig.url}${path}`;
   const classes = await getClasses();

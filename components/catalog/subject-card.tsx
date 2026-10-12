@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CatalogSubject } from "@/lib/syllabus";
+import type { CatalogSubject } from "@/lib/catalog";
 
 export function SubjectCard({
   classSlug,
@@ -22,7 +22,12 @@ export function SubjectCard({
       <div className="min-w-0">
         <h2 className="text-xl font-bold">{subject.name}</h2>
         <p className="mt-1 text-muted">
-          NCERT <em>{subject.book}</em> · {subject.chapters.length} chapters
+          {subject.book && (
+            <>
+              NCERT <em>{subject.book}</em> ·{" "}
+            </>
+          )}
+          {subject.chapters.length} chapters
         </p>
       </div>
       <span

@@ -1,27 +1,18 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
-import { getClasses } from "@/lib/catalog";
 import { Container } from "@/components/ui/container";
 import { Logo } from "./logo";
 
-export async function SiteFooter() {
-  const classes = await getClasses();
-
+// No database reads here: the footer is on every public page, and reading
+// the database would make static pages like About and Privacy slower.
+export function SiteFooter() {
   return (
     <footer className="mt-auto bg-ink text-white/80">
-      <Container className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="lg:col-span-2">
+      <Container className="grid gap-10 py-12 sm:grid-cols-3">
+        <div className="sm:col-span-2">
           <Logo tone="light" />
           <p className="mt-4 max-w-sm">{siteConfig.description}</p>
         </div>
-
-        <FooterColumn title="Classes">
-          {classes.map((cls) => (
-            <FooterLink key={cls.slug} href={`/classes/${cls.slug}`}>
-              {cls.name}
-            </FooterLink>
-          ))}
-        </FooterColumn>
 
         <FooterColumn title={siteConfig.name}>
           {[...siteConfig.nav, ...siteConfig.footerLinks].map((item) => (

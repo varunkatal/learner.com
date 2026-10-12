@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import type { CatalogChapter } from "@/lib/syllabus";
+import type { CatalogChapter } from "@/lib/catalog";
 
-// Chapters grouped by textbook part. Lessons arrive in Phase 2, so each row says "coming soon" for now.
+// Chapters grouped by textbook part. Lessons arrive in Phase 3, so each row says "coming soon" for now.
 export function ChapterList({ chapters }: { chapters: CatalogChapter[] }) {
   const parts = [...new Set(chapters.map((c) => c.part))];
   const showPartHeadings = parts.length > 1;

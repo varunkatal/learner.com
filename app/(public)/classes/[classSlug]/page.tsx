@@ -4,13 +4,10 @@ import { SubjectCard } from "@/components/catalog/subject-card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { getClass, getClasses } from "@/lib/catalog";
+import { getClass } from "@/lib/catalog";
 
-// Build every class page ahead of time.
-export async function generateStaticParams() {
-  const classes = await getClasses();
-  return classes.map((cls) => ({ classSlug: cls.slug }));
-}
+// Read the database on every visit, so admin panel edits show straight away.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -44,6 +41,11 @@ export default async function ClassPage({
           description="Choose a subject to see its chapters."
         />
       </div>
+      {cls.subjects.length === 0 && (
+        <p className="mt-10 text-lg text-muted">
+          Subjects for this class are coming soon.
+        </p>
+      )}
       <div className="mt-10 grid gap-5 md:grid-cols-2">
         {cls.subjects.map((subject) => (
           <SubjectCard

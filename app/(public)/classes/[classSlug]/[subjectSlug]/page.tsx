@@ -4,18 +4,10 @@ import { ChapterList } from "@/components/catalog/chapter-list";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { getClasses, getSubject } from "@/lib/catalog";
+import { getSubject } from "@/lib/catalog";
 
-// Build every class + subject page ahead of time.
-export async function generateStaticParams() {
-  const classes = await getClasses();
-  return classes.flatMap((cls) =>
-    cls.subjects.map((subject) => ({
-      classSlug: cls.slug,
-      subjectSlug: subject.slug,
-    })),
-  );
-}
+// Read the database on every visit, so admin panel edits show straight away.
+export const dynamic = "force-dynamic";
 
 type Props = PageProps<"/classes/[classSlug]/[subjectSlug]">;
 
@@ -26,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { cls, subject } = found;
   return {
     title: `${cls.name} ${subject.name} — All Chapters`,
-    description: `${cls.name} ${subject.name} video lessons for all ${subject.chapters.length} chapters of the NCERT ${subject.book} textbook.`,
+    description: `${cls.name} ${subject.name} video lessons for all ${subject.chapters.length} chapters${subject.book ? ` of the NCERT ${subject.book} textbook` : ""}.`,
     alternates: { canonical: `/classes/${cls.slug}/${subject.slug}` },
   };
 }
@@ -52,13 +44,23 @@ export default async function SubjectPage({ params }: Props) {
           title={`${cls.name} ${subject.name}`}
           description={
             <>
-              {subject.chapters.length} chapters · NCERT <em>{subject.book}</em>
+              {subject.chapters.length} chapters
+              {subject.book && (
+                <>
+                  {" "}
+                  · NCERT <em>{subject.book}</em>
+                </>
+              )}
             </>
           }
         />
       </div>
       <div className="mt-10">
-        <ChapterList chapters={subject.chapters} />
+        {subject.chapters.length > 0 ? (
+          <ChapterList chapters={subject.chapters} />
+        ) : (
+          <p className="text-lg text-muted">Chapters are coming soon.</p>
+        )}
       </div>
     </Container>
   );

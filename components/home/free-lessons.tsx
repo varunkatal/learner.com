@@ -4,6 +4,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { getClasses } from "@/lib/catalog";
 
 // Placeholder until real lessons exist (Phase 3): previews the first Maths chapter of each class.
+// getClasses() is cached per request, so this shares the home page's database connection.
 export async function FreeLessons() {
   const classes = await getClasses();
   const previews = classes.flatMap((cls) => {

@@ -1,5 +1,7 @@
 // Copies the syllabus from lib/syllabus.ts into MongoDB.
-// Safe to run more than once: existing records are updated, not duplicated.
+// Only adds what is missing: existing classes, subjects and chapters are left exactly
+// as they are, so edits made in the admin panel are never overwritten.
+// (Something you deleted in the admin panel will come back if it's still in the syllabus.)
 // Run with: npm run seed   (needs MONGODB_URI in .env.local)
 
 import mongoose from "mongoose";
@@ -29,7 +31,7 @@ async function seed() {
   for (const cls of getSyllabus()) {
     const classDoc = await ClassModel.findOneAndUpdate(
       { slug: cls.slug },
-      { name: cls.name, order: cls.order, isPublished: true },
+      { $setOnInsert: { name: cls.name, order: cls.order, isPublished: true } },
       upsert,
     );
 
@@ -37,10 +39,12 @@ async function seed() {
       const subjectDoc = await SubjectModel.findOneAndUpdate(
         { classId: classDoc._id, slug: subject.slug },
         {
-          name: subject.name,
-          book: subject.book,
-          order: subject.order,
-          isPublished: true,
+          $setOnInsert: {
+            name: subject.name,
+            book: subject.book,
+            order: subject.order,
+            isPublished: true,
+          },
         },
         upsert,
       );
@@ -49,11 +53,13 @@ async function seed() {
         await ChapterModel.findOneAndUpdate(
           { subjectId: subjectDoc._id, slug: chapter.slug },
           {
-            title: chapter.title,
-            order: chapter.order,
-            part: chapter.part,
-            number: chapter.number,
-            isPublished: true,
+            $setOnInsert: {
+              title: chapter.title,
+              order: chapter.order,
+              part: chapter.part,
+              number: chapter.number,
+              isPublished: true,
+            },
           },
           upsert,
         );
@@ -63,7 +69,7 @@ async function seed() {
     console.log(`✓ ${cls.name}`);
   }
 
-  console.log(`Done — ${chapterCount} chapters seeded.`);
+  console.log(`Done — ${chapterCount} chapters checked; missing ones added.`);
 }
 
 seed()

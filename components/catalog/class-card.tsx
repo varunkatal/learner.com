@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CatalogClass } from "@/lib/syllabus";
+import type { CatalogClass } from "@/lib/catalog";
 
 export function ClassCard({ cls }: { cls: CatalogClass }) {
   const chapterCount = cls.subjects.reduce(
@@ -13,7 +13,7 @@ export function ClassCard({ cls }: { cls: CatalogClass }) {
       className="group flex flex-col rounded-card border border-line bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover"
     >
       <span className="flex size-14 items-center justify-center rounded-2xl bg-blush text-2xl font-extrabold text-brand-ink">
-        {cls.grade}
+        {cls.badge}
       </span>
       <h3 className="mt-5 text-xl font-bold">{cls.name}</h3>
       <p className="mt-1 text-muted">

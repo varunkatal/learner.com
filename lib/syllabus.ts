@@ -1,5 +1,5 @@
-// The launch syllabus (NCERT, session 2026–27). Used to seed MongoDB and,
-// until the admin panel exists (Phase 2), as the source for public pages.
+// The launch syllabus (NCERT, session 2026–27). Used only by `npm run seed`
+// to fill an empty database; after that, the admin panel is the source of truth.
 //
 // Each subject lists its textbook's parts in order; a single-part book has one array.
 // Chapter numbers restart in each part, matching how the textbook numbers them.
@@ -259,7 +259,7 @@ const rawSyllabus: RawClass[] = [
   },
 ];
 
-export type CatalogChapter = {
+export type SyllabusChapter = {
   title: string;
   slug: string;
   order: number; // position across the whole subject (1, 2, 3 …)
@@ -267,20 +267,20 @@ export type CatalogChapter = {
   number: number; // chapter number within its part, as printed in the book
 };
 
-export type CatalogSubject = {
+export type SyllabusSubject = {
   name: string;
   slug: string;
   book: string;
   order: number;
-  chapters: CatalogChapter[];
+  chapters: SyllabusChapter[];
 };
 
-export type CatalogClass = {
+export type SyllabusClass = {
   name: string;
   slug: string;
   grade: number;
   order: number;
-  subjects: CatalogSubject[];
+  subjects: SyllabusSubject[];
 };
 
 export function slugify(text: string) {
@@ -291,9 +291,9 @@ export function slugify(text: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-// Turns the raw lists above into the shape pages and the seed script use:
+// Turns the raw lists above into the shape the seed script uses:
 // adds slugs, ordering and part numbers.
-export function getSyllabus(): CatalogClass[] {
+export function getSyllabus(): SyllabusClass[] {
   return rawSyllabus.map((cls, classIndex) => ({
     name: `Class ${cls.grade}`,
     slug: `class-${cls.grade}`,

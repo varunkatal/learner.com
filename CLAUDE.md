@@ -16,7 +16,7 @@ Read this file and `ROADMAP.md` before starting any task.
 
 GitHub: https://github.com/varunkatal/learner.com (branch `main`). The project was re-planned in October 2026 from a paid stack (Vercel, Razorpay, Cloudflare/Bunny Stream, Resend) to the zero-cost plan described here; Phase 1 pages from the old plan were kept and reworded.
 
-**How data flows now:** `lib/syllabus.ts` holds the NCERT 2026–27 syllabus (Classes 6–10, Maths + Science) and is the only data source so far. Pages never read it directly — they call `lib/catalog.ts` (`getClasses`, `getClass`, `getSubject`). In Phase 2, swap those function bodies for MongoDB queries; pages stay unchanged. `npm run seed` copies the syllabus into MongoDB (idempotent upserts via `models/`).
+**How data flows now:** MongoDB is the source of truth for the course structure; Varun edits it in the admin panel (`/admin/classes` → class → subject → chapter; Server Actions in `app/admin/actions.ts`). Public pages call `lib/catalog.ts` (`getClasses`, `getClass`, `getSubject`), which returns **published items only** and is wrapped in React `cache()` so one page opens one connection. Pages that call it export `dynamic = "force-dynamic"` (no ISR on our cache), so they cost ~1.3 s per visit; the footer deliberately doesn't read the database so About/Privacy/etc. stay static. `lib/syllabus.ts` (NCERT 2026–27, Classes 6–10, Maths + Science) is only used by `npm run seed`, which inserts missing items with `$setOnInsert` and never overwrites admin edits.
 
 **Next.js on Cloudflare — constraints found while setting up:**
 
@@ -26,7 +26,6 @@ GitHub: https://github.com/varunkatal/learner.com (branch `main`). The project w
 - **Database access in pages and API routes goes through `withDB()` in `lib/db.ts`**, which opens a connection per request and closes it (`withDB((db) => db.model(ClassModel).findOne())`). A connection cached across requests hangs the next request on Workers. `connectDB()` (one shared connection) is only for Node scripts like `scripts/seed.ts`. Each request pays ~1s to connect; if a page needs several queries, do them inside one `withDB` call.
 - CPU: static pages use ~2 ms, a request that opens a MongoDB connection ~30 ms. The free plan's limit is 10 ms per request, yet these succeeded (outcome `ok`). Watch `npx wrangler tail` for `exceededCpu` once real pages use the database, and keep database work to pages that need it.
 - **Auth (Auth.js v5 beta, `next-auth@5.0.0-beta.32`, pinned):** config in `lib/auth.ts`. On sign-in the `jwt` callback upserts the User (via `withDB`) and puts `userId` + `role` in the JWT cookie; admin = email listed in `siteConfig.adminEmails`, recalculated every sign-in. Public pages stay static: the header's `AccountButton` is a client component reading `useSession()` (`SessionProvider` in `components/providers.tsx`). Admin pages call `requireAdmin()` (done once in `app/admin/layout.tsx`; API routes must call it themselves). Google OAuth redirect URIs registered: `localhost:3000`, `localhost:8787` and the workers.dev address, each with `/api/auth/callback/google`. Google client secrets are only shown once at creation; make a new one under Clients → client → "Add secret".
-- `/db-check` is a temporary Phase 0 page that reads MongoDB at request time; delete it once Phase 2 pages read from the database.
 - Free-plan Worker limit is 3 MiB compressed; with Mongoose and Auth.js the build is about 2.6 MiB, so be careful adding dependencies. Check with `npx wrangler deploy --dry-run --outdir /tmp/w`.
 - Next.js 16 APIs differ from older versions: read `node_modules/next/dist/docs/` before using an unfamiliar API (see `AGENTS.md`).
 
@@ -127,7 +126,7 @@ npm run deploy        # Cloudflare build + deploy to workers.dev (if `npx wrangl
 npx wrangler tail learnerhub   # live logs from the deployed site
 npm run lint          # ESLint
 npm run format        # Prettier (also sorts Tailwind classes); format:check to verify
-npm run seed          # copy lib/syllabus.ts into MongoDB (needs MONGODB_URI in .env.local)
+npm run seed          # add any missing lib/syllabus.ts items to MongoDB; never overwrites (needs MONGODB_URI in .env.local)
 npx tsc --noEmit      # type-check
 ```
 

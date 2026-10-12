@@ -4,6 +4,9 @@ import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getClasses } from "@/lib/catalog";
 
+// Read the database on every visit, so admin panel edits show straight away.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Classes",
   description:
