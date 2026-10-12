@@ -20,6 +20,7 @@
   --color-surface: #f8f9fc; /* light grey page sections */
   --color-line: #e8eaf2; /* borders */
   --color-success: #10b981;
+  --color-success-ink: #047857; /* darker green for readable success text */
   --color-warning: #f59e0b;
   --color-error: #dc2626;
 

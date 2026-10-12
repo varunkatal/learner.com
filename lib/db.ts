@@ -12,9 +12,9 @@ function getUri() {
 // Cloudflare Workers can't reuse a connection opened during an earlier visit
 // (the next visit hangs), so every request gets its own short-lived connection.
 // Usage: const cls = await withDB((db) => db.model(ClassModel).findOne());
-export async function withDB<T>(
-  fn: (db: { model: <M>(model: Model<M>) => Model<M> }) => Promise<T>,
-): Promise<T> {
+export type DB = { model: <M>(model: Model<M>) => Model<M> };
+
+export async function withDB<T>(fn: (db: DB) => Promise<T>): Promise<T> {
   const conn = await mongoose
     .createConnection(getUri(), {
       maxPoolSize: 1,

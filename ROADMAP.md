@@ -90,7 +90,7 @@ Class (e.g. Class 9)
 - [x] User saved in MongoDB on first login (role `student` by default)
 - [x] Varun's Gmail set as `admin` via config
 - [x] Protected `/admin` area (server-side role check)
-- [ ] Admin: add / edit / reorder / publish Classes, Subjects, Chapters
+- [x] Admin: add / edit / reorder / publish Classes, Subjects, Chapters
 - [ ] Student profile page: name, class, WhatsApp number
 
 **Done when:** Varun can log in as admin and build the real syllabus; a student can log in with Gmail.

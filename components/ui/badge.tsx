@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 const tones = {
   brand: "bg-blush text-brand-ink",
   ink: "bg-lavender text-ink",
-  success: "bg-success/10 text-[#047857]", // darker green for readable text
+  success: "bg-success/10 text-success-ink",
   muted: "bg-surface text-muted",
 } as const;
 
