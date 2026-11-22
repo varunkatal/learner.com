@@ -101,9 +101,11 @@ Class (e.g. Class 9)
 
 **Goal:** Varun pastes a YouTube link and the lesson appears in the right chapter.
 
-- [ ] Admin: add lesson — paste YouTube link (site extracts the video ID), title, description, chapter, order, FREE / MEMBERS, notes link
-- [ ] Lesson page: embedded player (`youtube-nocookie.com`), description, notes button, next / previous lesson
-- [ ] FREE lessons: anyone can watch
+Built wider than first planned: each chapter has five kinds of content, shown as tabs (Animated videos · Recorded classes · Notes · PPT · Worksheets). Videos are YouTube links; the rest are Google Drive links. For now every item opens for any signed-in student; logged-out visitors see titles only.
+
+- [x] Admin: add lesson — paste YouTube link (site extracts the video ID), title, description, chapter, order, FREE / MEMBERS, notes link
+- [x] Lesson page: embedded player (`youtube-nocookie.com`), description, notes button, next / previous lesson
+- [x] FREE lessons: anyone can watch (decided: any signed-in student)
 - [ ] MEMBERS lessons: video ID is **only sent from the server to active members**; others see a locked card with "Become a member"
 - [ ] Chapter page shows lock icons on members-only lessons
 

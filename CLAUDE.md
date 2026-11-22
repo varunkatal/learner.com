@@ -10,7 +10,7 @@ Read this file and `ROADMAP.md` before starting any task.
 
 **Hard rule: running cost must stay ₹0.** Use only free plans. Never add a paid service, paid API or paid plan without Varun's explicit approval. Paid options (custom domain, Razorpay, Cloudflare Stream, Expo store apps) are listed under "Future upgrades" in `ROADMAP.md` — don't build them early.
 
-**Current phase:** Phase 2 — Login and admin panel (Phases 0 and 1 done; live at https://learnerhub.learnerhub.workers.dev). Update this line when a phase is completed.
+**Current phase:** Phase 2 — Login and admin panel, with Phase 3 chapter content (videos, notes, PPT, worksheets) built early (Phases 0 and 1 done; live at https://learnerhub.learnerhub.workers.dev). Update this line when a phase is completed.
 
 ## Repository state
 
@@ -87,9 +87,9 @@ Keep configuration in `config/`. Never hard-code the site name, prices, UPI ID o
 - **Class**: name, slug, order, isPublished
 - **Subject**: classId, name, slug, order, isPublished
 - **Chapter**: subjectId, title, slug, order, isPublished
-- **Lesson**: chapterId, title, slug, description, order, access (`free` | `members`), provider (`youtube`), youtubeId, notesUrl, durationSec (optional), isPublished, createdAt
+- **ChapterItem** (`models/ChapterItem.ts`, replaces the planned Lesson): chapterId, type (`animated` | `recorded` | `notes` | `ppt` | `worksheet`; list in `config/content.ts`), title, description, youtubeId (video types) or url (file types, https / Google Drive), order (within its type), access (`free` | `members`, default `free`, no admin UI until Phase 4), isPublished (new items start published), timestamps. Shown as tabs on `/classes/[class]/[subject]/[chapter]`; `getChapter()` in `lib/catalog.ts` only sends youtubeId/url when `canOpen()` in `lib/access.ts` allows (currently: signed in)
 - **PaymentRequest**: userId, planId, amountRupees, utr, status (`pending` | `approved` | `rejected`), adminNote, createdAt, reviewedAt
-- **Progress**: userId, lessonId, positionSec, completed, updatedAt (unique on userId + lessonId)
+- **Progress**: userId, lessonId (a ChapterItem id), positionSec, completed, updatedAt (unique on userId + lessonId)
 - **LiveClass**: title, classId, subjectId, scheduledAt, access, youtubeId, status (`scheduled` | `live` | `ended`), lessonId (set after converting to a lesson)
 
 Store times in **UTC** and display them in IST (Asia/Kolkata). A membership is active only if `status === "active"` and `validUntil > now`. Check expiry on every access, not with a background job.

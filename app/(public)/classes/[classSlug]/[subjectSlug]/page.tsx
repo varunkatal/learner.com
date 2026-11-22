@@ -57,7 +57,10 @@ export default async function SubjectPage({ params }: Props) {
       </div>
       <div className="mt-10">
         {subject.chapters.length > 0 ? (
-          <ChapterList chapters={subject.chapters} />
+          <ChapterList
+            chapters={subject.chapters}
+            basePath={`/classes/${cls.slug}/${subject.slug}`}
+          />
         ) : (
           <p className="text-lg text-muted">Chapters are coming soon.</p>
         )}

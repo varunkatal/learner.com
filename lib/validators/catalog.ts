@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { contentTypeIds, isVideoType } from "@/config/content";
+import { youtubeIdFrom } from "@/lib/video";
 
 // Checks for the admin forms that add and edit Classes, Subjects and Chapters.
 
@@ -62,7 +64,55 @@ export const chapterInput = z.object({
   number: position("Chapter number"),
 });
 
-const kind = z.enum(["class", "subject", "chapter"]);
+// One video or file inside a chapter. `link` is a YouTube link for videos, an https link (Google Drive) for files.
+// The output has `youtubeId` or `url` filled in, ready to save.
+export const itemInput = z
+  .object({
+    id: objectId.optional(),
+    chapterId: objectId.optional(),
+    type: z.enum(contentTypeIds, { error: "Please choose a type." }),
+    title: z
+      .string()
+      .trim()
+      .min(1, "Please enter a title.")
+      .max(120, "Keep the title under 120 characters."),
+    link: z.string().trim().min(1, "Please paste a link."),
+    description: z
+      .string()
+      .trim()
+      .max(500, "Keep the description under 500 characters.")
+      .optional(),
+  })
+  .transform((data, ctx) => {
+    const { link, ...rest } = data;
+    if (isVideoType(data.type)) {
+      const youtubeId = youtubeIdFrom(link);
+      if (!youtubeId) {
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "That doesn't look like a YouTube link. Copy it from YouTube's Share button.",
+        });
+        return z.NEVER;
+      }
+      return { ...rest, youtubeId, url: undefined };
+    }
+    let ok = false;
+    try {
+      ok = new URL(link).protocol === "https:";
+    } catch {}
+    if (!ok) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Please paste a full link starting with https:// (e.g. a Google Drive share link).",
+      });
+      return z.NEVER;
+    }
+    return { ...rest, url: link, youtubeId: undefined };
+  });
+
+const kind = z.enum(["class", "subject", "chapter", "item"]);
 
 export const moveInput = z.object({
   kind,

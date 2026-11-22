@@ -12,12 +12,14 @@ import {
   chapterInput,
   classInput,
   deleteInput,
+  itemInput,
   moveInput,
   publishInput,
   subjectInput,
   type FormState,
 } from "@/lib/validators/catalog";
 import { ChapterModel } from "@/models/Chapter";
+import { ChapterItemModel } from "@/models/ChapterItem";
 import { ClassModel } from "@/models/Class";
 import { SubjectModel } from "@/models/Subject";
 
@@ -30,8 +32,10 @@ type CatalogItem = {
   order: number;
   classId?: Types.ObjectId;
   subjectId?: Types.ObjectId;
+  chapterId?: Types.ObjectId;
+  type?: string; // items only: reordering stays within one type (tab)
 };
-type ParentField = "classId" | "subjectId";
+type ParentField = "classId" | "subjectId" | "chapterId";
 
 const levels: Record<
   CatalogKind,
@@ -60,7 +64,16 @@ const levels: Record<
   chapter: {
     model: ChapterModel as unknown as Model<CatalogItem>,
     parent: { field: "subjectId", kind: "subject" },
-    child: null, // Phase 3: lessons go here, so chapters with lessons can't be deleted
+    // A chapter with videos or files can't be deleted.
+    child: {
+      model: ChapterItemModel as unknown as Model<CatalogItem>,
+      field: "chapterId",
+    },
+  },
+  item: {
+    model: ChapterItemModel as unknown as Model<CatalogItem>,
+    parent: { field: "chapterId", kind: "chapter" },
+    child: null,
   },
 };
 
@@ -208,6 +221,56 @@ export async function saveChapter(
   });
 }
 
+// Adds or edits a video / file inside a chapter. New items are published straight away.
+export async function saveItem(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const parsed = itemInput.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return fail(parsed.error);
+  const { id, chapterId, type, title, description, youtubeId, url } =
+    parsed.data;
+  // Only one of youtubeId / url is set, depending on the type.
+  const link = youtubeId ? { youtubeId } : { url };
+  const fields = { type, title, description: description ?? "", ...link };
+
+  return save(async (db) => {
+    const Item = db.model(ChapterItemModel);
+    if (id) {
+      const existing = await Item.findById(id).lean();
+      if (!existing) return "This item no longer exists.";
+      const order =
+        existing.type === type
+          ? existing.order
+          : await nextOrder(db.model(levels.item.model), {
+              chapterId: existing.chapterId,
+              type,
+            });
+      // $unset clears the link field the new type doesn't use.
+      await Item.updateOne(
+        { _id: id },
+        {
+          $set: { ...fields, order },
+          $unset: youtubeId ? { url: 1 } : { youtubeId: 1 },
+        },
+      );
+    } else {
+      if (
+        !chapterId ||
+        !(await db.model(ChapterModel).exists({ _id: chapterId }))
+      ) {
+        return "This chapter no longer exists.";
+      }
+      const order = await nextOrder(db.model(levels.item.model), {
+        chapterId,
+        type,
+      });
+      await Item.create({ chapterId, ...fields, order, isPublished: true });
+    }
+  });
+}
+
 // Swaps an item with its neighbour, then renumbers the whole list 1, 2, 3…
 // so the order stays clean even if two items once shared a number.
 export async function moveItem(formData: FormData) {
@@ -219,9 +282,11 @@ export async function moveItem(formData: FormData) {
     const Item = db.model(model);
     const item = await Item.findById(id).lean();
     if (!item) return;
-    const siblings = await Item.find(
-      parent ? { [parent.field]: item[parent.field] } : {},
-    )
+    const filter: Record<string, unknown> = parent
+      ? { [parent.field]: item[parent.field] }
+      : {};
+    if (kind === "item") filter.type = item.type; // move within one tab only
+    const siblings = await Item.find(filter)
       .sort({ order: 1, _id: 1 })
       .select("_id")
       .lean();
